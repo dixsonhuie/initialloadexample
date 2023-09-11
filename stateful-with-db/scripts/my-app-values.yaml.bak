@@ -1,0 +1,10 @@
+space:
+  name: demo
+db:
+  driver: org.hsqldb.jdbc.JDBCDriver
+  url: jdbc:hsqldb:hsql://localhost/demo-db
+  user: sa
+  password: 
+hibernate:
+  dialect: org.hibernate.dialect.HSQLDialect
+  limitResults: 

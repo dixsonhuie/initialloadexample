@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mycompany.app</groupId>
+    <artifactId>my-app</artifactId>
+    <version>0.1</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <gigaspaces.version>16.2.1</gigaspaces.version>
+	<spring.version>5.3.22</spring.version>
+        <hibernate.version>5.3.10.Final</hibernate.version>
+        <db.driver.groupId>com.microsoft.sqlserver</db.driver.groupId>
+        <db.driver.artifactId>mssql-jdbc</db.driver.artifactId>
+        <db.driver.version>12.4.1.jre11</db.driver.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>org.openspaces</id>
+            <url>http://maven-repository.openspaces.org</url>
+        </repository>
+    </repositories>
+
+    <modules>
+        <module>feeder</module>
+        <module>my-app-model</module>
+        <module>space</module>
+	<module>space-tiered-storage</module>
+        <module>mirror</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
+            <dependency>
+                <groupId>${db.driver.groupId}</groupId>
+                <artifactId>${db.driver.artifactId}</artifactId>
+                <version>${db.driver.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

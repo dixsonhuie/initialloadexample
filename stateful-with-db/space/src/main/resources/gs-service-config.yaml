@@ -1,0 +1,13 @@
+db:
+  driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  url: jdbc:sqlserver://172.31.0.227:1433;databaseName=piperdb;encrypt=false
+  user: piper
+  password: Piper123*
+
+hibernate:
+  dialect: org.hibernate.dialect.SQLServer2012Dialect
+
+space:
+  name: demo
+  dataSource:
+    fetchSize: 100

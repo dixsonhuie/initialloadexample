@@ -13,7 +13,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <gigaspaces.version>16.2.1</gigaspaces.version>
-	<spring.version>5.3.22</spring.version>
+        <spring.version>5.3.22</spring.version>
         <hibernate.version>5.3.10.Final</hibernate.version>
         <db.driver.groupId>com.microsoft.sqlserver</db.driver.groupId>
         <db.driver.artifactId>mssql-jdbc</db.driver.artifactId>
@@ -29,9 +29,10 @@
 
     <modules>
         <module>feeder</module>
-        <module>my-app-model</module>
+        <module>instrumentation</module>
+        <module>model</module>
         <module>space</module>
-	<module>space-tiered-storage</module>
+        <module>space-tiered-storage</module>
         <module>mirror</module>
     </modules>
 

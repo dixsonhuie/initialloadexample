@@ -9,7 +9,7 @@
         <dependencySet>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
-                <include>com.mycompany.app:my-app-model</include>
+                <include>com.mycompany.app:model</include>
             </includes>
         </dependencySet>
         <!-- transitive dependencies -->

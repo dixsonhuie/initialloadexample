@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>feeder</artifactId>
+    <artifactId>instrumentation</artifactId>
 
     <parent>
         <artifactId>my-app</artifactId>
@@ -72,10 +72,13 @@
                 <version>3.2.0</version>
                 <configuration>
                     <archive>
+                        <!--manifestFile/-->
                         <manifest>
-                            <mainClass>com.mycompany.app.MultithreadedFeeder</mainClass>
-                            <!-- mainClass>com.mycompany.app.Feeder</mainClass -->
+                            <mainClass>com.mycompany.app.InstrumentationExample</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Premain-class>com.mycompany.app.InstrumentationAgent</Premain-class>
+                        </manifestEntries>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>

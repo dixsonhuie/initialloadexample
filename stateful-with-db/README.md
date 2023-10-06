@@ -1,17 +1,17 @@
+
+## Requirements
+
+ * Maven
+ * JDK
+ 
 ## Getting Started
-This package contains a script (demo-start sh/bat) that automatically builds and deploys GigaSpaces with both a Mirror and a Space. The Space is configured to initially load data from the configured data source, so you can explore the functionality of the GigaSpaces product and build applications on top of it.
+This package contains a script (demo-start.sh) that automatically builds and deploys GigaSpaces with both a Mirror and a Space. The Space is configured to initially load data from the configured data source, so you can explore the functionality of the GigaSpaces product and build applications on top of it.
   
-In order to properly run scripts of this blueprint, the contents of this zip file must be extracted under <GigaSpaces home>/bin directory, for example <GigaSpaces home>/bin/stateful-with-db (the contents of the package should be directly underneath, not nested in an additional folder).
 
-### Prerequisite for running locally
-You must run a GigaSpaces Manager, for example:
-gs.sh --auto
-
-### Running demo-start (sh/bat)
+### Running demo-start.sh
 This script does the following:
 
-1. Runs a local HSQLDB (if the blueprint was not generated from GigaSpaces Ops Manager)
-2. Starts a container and deploys the Mirror service (Processing Unit).
-3. Starts containers and deploys the Space services (Processing Units).
+1. Builds the project.
+2. Starts the service grid.
+3. Deploys the Processing Units (space and mirror).
 
-Open GigaSpaces Ops Manager to view the deployed services and data.

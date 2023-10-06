@@ -6,12 +6,12 @@ set -x
 
 HOSTNAME="$(hostname)"
 
-if [ "ip-172-31-0-44" == "$HOSTNAME" ]; then 
+if [ "$COMMAND_HOST" == "$HOSTNAME" ]; then 
 
   if [ "true" == "$SPACE_HA" ]; then 
     echo "Deploying space with ha..."
     if [ "true" == "$MULTI_SERVER" ]; then
-      $GS_HOME/bin/gs.sh pu deploy --properties=my-app-values.yaml --zones=space --partitions=${SPACE_PARTITIONS} --ha --max-instances-per-machine=1 space ../target/space-0.1.jar
+      $GS_HOME/bin/gs.sh pu deploy --properties=my-app-values.yaml --zones=space --partitions=${SPACE_PARTITIONS} --ha --max-instances-per-machine=$MAX_INSTANCES_PER_MACHINE space ../target/space-0.1.jar
     else
       $GS_HOME/bin/gs.sh pu deploy --properties=my-app-values.yaml --zones=space --partitions=${SPACE_PARTITIONS} --ha space ../target/space-0.1.jar
     fi

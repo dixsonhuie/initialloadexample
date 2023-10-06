@@ -13,11 +13,11 @@ public class Feeder {
 
     // each object will have a 1k payload
     // this will be roughly 10 gb of data
-    private static final int MAX_OBJECTS = 10 * 1024 * 1024;
+    private static final int DEFAULT_MAX_OBJECTS = 10 * 1024 * 1024;
 
-    private int maxObjects = MAX_OBJECTS;
+    private int maxObjects = DEFAULT_MAX_OBJECTS;
 
-    private static final int MAX_PAYLOAD = 1024;
+    private static final int MAX_PAYLOAD = 936;
 
     private static Logger logger = Logger.getLogger(Feeder.class.getName());
 
@@ -76,7 +76,7 @@ public class Feeder {
         System.out.println("This program creates objects for testing purposes.");
         System.out.println("The following arguments are used:");
         System.out.println("  --max_objects=<n>");
-        System.out.println("    The number of objects to write to the space>. Default is: " + MAX_OBJECTS);
+        System.out.println("    The number of objects to write to the space>. Default is: " + DEFAULT_MAX_OBJECTS);
         System.out.println("  --help");
         System.out.println("    Display this help message.");
     }
@@ -113,6 +113,6 @@ public class Feeder {
         } catch (Exception e) {
             e.printStackTrace();
         }
-	System.exit(0);
+        System.exit(0);
     }
 }

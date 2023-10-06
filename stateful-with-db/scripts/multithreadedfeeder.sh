@@ -17,8 +17,10 @@ export GS_LOOKUP_GROUPS="xap-16.2.1"
 nohup java -Xms1g -Xmx1g -jar $PROJ_DIR/feeder/target/feeder-0.1-jar-with-dependencies.jar \
   -spaceName demo -numThreads 3 -sleepInterval 5 \
   -writeChunkSize 10000 \
-  -maxObjects 52428800 \
-  -numberOfPartitions 3 \
+  -maxObjects 7000000 \
+  -numberOfPartitions 1 \
   -partitionId 1 \
-  -startId 1553310 \
 >/tmp/feeder.log 2>&1 &
+
+
+#  -startId 1553310 \

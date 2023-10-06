@@ -23,7 +23,7 @@ public class MultithreadedFeeder {
     private static final int MAX_SLEEP_INTERVAL_AFTER_ERROR = 15 * 60;
 
     private static final int MAX_NUM_OBJECTS = 524_288_000;
-    private static final int MAX_PAYLOAD_SIZE = 1024;
+    private static final int MAX_PAYLOAD_SIZE = 936;
 
     private static final int MAX_LEASE_TIMEOUT = 12 * 3600 * 1000;
     private static final int MAX_TIMEOUT = 12 * 3600;
@@ -48,7 +48,7 @@ public class MultithreadedFeeder {
     private static final int DEFAULT_NUM_OBJECTS = 5_000_000;
 
     // size of string in payload
-    private static final int DEFAULT_PAYLOAD_SIZE = 1024;
+    private static final int DEFAULT_PAYLOAD_SIZE = 936;
 
     private static final int DEFAULT_LEASE_TIMEOUT = 0;
     private static final int DEFAULT_TIMEOUT = 3600;
@@ -68,7 +68,8 @@ public class MultithreadedFeeder {
     private static int leaseTimeout = DEFAULT_LEASE_TIMEOUT;
     private static int timeout = DEFAULT_TIMEOUT;
     private static int numberOfPartitions = 1;
-    private static Integer[] partitionIds = new Integer[1] {1};
+    private static Integer[] DEFAULT_PARTITION_IDS = {1};
+    private static Integer[] partitionIds = DEFAULT_PARTITION_IDS;
 
     private static String username;
     private static String password;
@@ -160,17 +161,17 @@ public class MultithreadedFeeder {
         String[] sPartitions = new String[MAX_NUMBER_OF_PARTITIONS];
         sPartitions = value.split(",");
 
-	try {
-            for( int i=0; i < sPartitions.length ) {
-                partition[i] = Integer.parseInt(sPartitions[i]);
-	        if( partition[i] < 1 || partition[i] > max ) {
+        try {
+            for( int i=0; i < sPartitions.length; i++ ) {
+                partitions[i] = Integer.parseInt(sPartitions[i]);
+                if( partitions[i] < 1 || partitions[i] > max ) {
                     throw new NumberFormatException("Partition id cannot be less than 1 or greater than " + max + ".");
                 }
             }
-	} catch (NumberFormatException nfe) {
-            return new Integer[1] {1};
-	}
-	return partitions;
+        } catch (NumberFormatException nfe) {
+            return DEFAULT_PARTITION_IDS;
+        }
+        return partitions;
     }
 
     private static int checkRange(String value, int min, int max, int defaultValue) {
@@ -277,8 +278,8 @@ public class MultithreadedFeeder {
                 log.info("Partition(s): " + partitionIds);
             }
             else {
-                 numberOfPartitons = 1;
-                 partitionIds = new Integer[1] {1};
+                 numberOfPartitions = 1;
+                 partitionIds = DEFAULT_PARTITION_IDS;
             }
 
             totalNumberOfThreads = threadCount * numberOfPartitions;
@@ -287,7 +288,7 @@ public class MultithreadedFeeder {
                     Executors.newFixedThreadPool(threadCount);
 
             for( int i=0; i < threadCount; i++) {
-                for (int j=0; j< partitionIds.length; j++ {
+                for (int j=0; j< partitionIds.length; j++) {
                     int threadId = (i * numberOfPartitions) + partitionIds[j];
 
                     executorService.submit(new Runnable() {

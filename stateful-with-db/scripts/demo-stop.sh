@@ -7,7 +7,7 @@ HOSTNAME="$(hostname)"
 
 echo "HOSTNAME is $HOSTNAME"
 
-if [ "ip-172-31-0-44" == "$HOSTNAME" ]; then
+if [ "$COMMAND_HOST" == "$HOSTNAME" ]; then
   ./undeploy.sh
   sleep 10
 else

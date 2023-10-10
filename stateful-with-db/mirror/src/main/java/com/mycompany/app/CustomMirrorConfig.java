@@ -44,6 +44,12 @@ public class CustomMirrorConfig extends EmbeddedSpaceBeansConfig {
     private String partitions;
     @Value("${space.ha}")
     private boolean ha;
+    @Value("${hibernate.connection.initial_pool_size:1}")
+    private String initialPoolSize;
+    @Value("${hibernate.connection.pool_size:20}")
+    private String poolSize;
+    @Value("${hibernate.connection.pool_validation_interval:30}")
+    private String poolValidationInterval;
 
     @Override
     protected void configure(EmbeddedSpaceFactoryBean factoryBean) {
@@ -70,6 +76,9 @@ public class CustomMirrorConfig extends EmbeddedSpaceBeansConfig {
             .setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider")
             .setProperty("hibernate.jdbc.use_scrollable_resultset", "false")
             .setProperty("hibernate.hbm2ddl.auto", "update")
+            .setProperty("hibernate.connection.initial_pool_size", initialPoolSize)
+            .setProperty("hibernate.connection.pool_size", poolSize)
+            .setProperty("hibernate.connection.pool_validation_interval", poolValidationInterval)
             .buildSessionFactory();
     }
     

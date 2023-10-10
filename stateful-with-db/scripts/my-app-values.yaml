@@ -1,3 +1,11 @@
 space:
   mirror:
-    redoLogCapacity: 2000000
+    redoLogCapacity: 12000000
+    bulk-size: 20000 
+    interval-millis: 10000
+    interval-opers: 100000
+hibernate:
+  connection:
+    pool_size: 200
+    initial_pool_size: 200
+    pool_validation_interval: 120

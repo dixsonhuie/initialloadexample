@@ -6,6 +6,7 @@ import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.RedoLogCapacityExceededException;
 import org.openspaces.core.space.SpaceProxyConfigurer;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,7 +28,7 @@ public class MultithreadedFeeder {
 
     private static final int MAX_LEASE_TIMEOUT = 12 * 3600 * 1000;
     private static final int MAX_TIMEOUT = 12 * 3600;
-    private static final int MAX_NUMBER_OF_PARTITIONS = 3;
+    private static final int MAX_NUMBER_OF_PARTITIONS = 8;
 
     private static Logger log = Logger.getLogger(MultithreadedFeeder.class.getName());
     private GigaSpace gigaSpace;
@@ -70,6 +71,7 @@ public class MultithreadedFeeder {
     private static int numberOfPartitions = 1;
     private static Integer[] DEFAULT_PARTITION_IDS = {1};
     private static Integer[] partitionIds = DEFAULT_PARTITION_IDS;
+    private static String partitionIdsValue;
 
     private static String username;
     private static String password;
@@ -110,11 +112,11 @@ public class MultithreadedFeeder {
 
             log.info(String.format("Run id is: %d", runId));
             int numberOfWrites = 0;
-            int i = (numberOfPartitions) * (startId / totalNumberOfThreads) + runId;
+            int i = (totalNumberOfThreads * (startId / totalNumberOfThreads)) + (runId - 1);
             while (i < maxObjects) {
                 Data data = new Data();
 
-                if( (i % totalNumberOfThreads) + 1 == runId) {
+                //if( (i % totalNumberOfThreads) + 1 == runId) {
                     data.setId(i);
 
                     data.setMessage(String.format("msg  - %d", i));
@@ -128,15 +130,14 @@ public class MultithreadedFeeder {
                             gigaSpace.write(data);
                         }
                         numberOfWrites ++;
-                        i ++;
-                        if (numberOfWrites % writeChunkSize == 0) {
+                        i += totalNumberOfThreads;
+                        if (numberOfWrites % writeChunkSize == 0 && sleepInterval != 0 ) {
                             try {
                                 Thread.sleep((long) sleepInterval * 1000L);
                             } catch (InterruptedException ie) {
                                 ie.printStackTrace();
                             }
                         }
-                        continue;
                     } catch(RedoLogCapacityExceededException exception) {
                         log.info("threadId: " + runId + ", " + exception.getMessage());
                         try {
@@ -146,8 +147,7 @@ public class MultithreadedFeeder {
                             e.printStackTrace();
                         }
                     }
-                }
-                i ++;
+                //}
             }
 
             log.info(String.format("Finished run %d", runId));
@@ -156,16 +156,22 @@ public class MultithreadedFeeder {
 
     }
 
-    private static Integer[] parsePartitionId(String value, int min, int max, int defaultValue) {
-        Integer[] partitions = new Integer[MAX_NUMBER_OF_PARTITIONS];
-        String[] sPartitions = new String[MAX_NUMBER_OF_PARTITIONS];
-        sPartitions = value.split(",");
+    private static Integer[] parsePartitionId(String partitionIdsValue, int numberOfPartitions) {
 
+
+        String[] sPartitions = partitionIdsValue.split(",");
+        Integer[] partitions = new Integer[sPartitions.length];
+
+        if( sPartitions.length > MAX_NUMBER_OF_PARTITIONS ) {
+            log.info("Incorrect number of partitions specified.");
+            return DEFAULT_PARTITION_IDS;
+        }
         try {
+
             for( int i=0; i < sPartitions.length; i++ ) {
                 partitions[i] = Integer.parseInt(sPartitions[i]);
-                if( partitions[i] < 1 || partitions[i] > max ) {
-                    throw new NumberFormatException("Partition id cannot be less than 1 or greater than " + max + ".");
+                if( partitions[i] < 1 || partitions[i] > MAX_NUMBER_OF_PARTITIONS ) {
+                    throw new NumberFormatException("Partition id cannot be less than 1 or greater than " + MAX_NUMBER_OF_PARTITIONS + ".");
                 }
             }
         } catch (NumberFormatException nfe) {
@@ -186,6 +192,34 @@ public class MultithreadedFeeder {
         }
         return defaultValue;
     }
+    public static void printUsage() {
+        System.out.println("This program is a multi-threaded feeder.");
+        System.out.println("Available arguments are:");
+        System.out.println("  -spaceName,      Space name.");
+        System.out.println("       Default: " + DEFAULT_SPACE_NAME);
+        System.out.println("  -numThreads,     Number of threads.");
+        System.out.println("       Default: " + DEFAULT_NUM_THREADS + ", Max: " + MAX_NUM_THREADS);
+        System.out.println("  -writeChunkSize, Number of objects written per interval.");
+        System.out.println("       Default: " + DEFAULT_WRITE_CHUNK_SIZE + ", Max: " + MAX_WRITE_CHUNK_SIZE);
+        System.out.println("  -sleepInterval,  Sleep interval after writing a chunk (in seconds).");
+        System.out.println("       Default: " + DEFAULT_SLEEP_INTERVAL + ", Max: " + MAX_SLEEP_INTERVAL);
+        System.out.println("  -startId,       The id to begin writing to the space. This is useful when resuming the feeder.");
+        System.out.println("       Default: " + DEFAULT_START_ID + ", Max: " + MAX_NUM_OBJECTS);
+        System.out.println("  -maxObjects,     Maximum number of objects in space.");
+        System.out.println("       Default: " + DEFAULT_NUM_OBJECTS + ", Max: " + MAX_NUM_OBJECTS);
+        System.out.println("  -payloadSize,    Payload size (in bytes).");
+        System.out.println("       Default: " + DEFAULT_PAYLOAD_SIZE + ", Max: " + MAX_PAYLOAD_SIZE);
+        System.out.println("  -leaseTimeout: Lease timeout (in milliseconds)");
+        System.out.println("       Default: No lease timeout used.");
+        System.out.println("  -timeout,        Timeout (in seconds) for the ExecutorService.");
+        System.out.println("       Default: " + DEFAULT_TIMEOUT);
+        System.out.println("  -numberOfPartitions,  Number of partitions.");
+        System.out.println("  -partitionIds,    The partitionIds, used with -numberOfPartitions to route values to multiple partitions.");
+        System.out.println("       For example, if numberOfPartitions is 3, partitionIds can be: 1, 2 or 3, separated with a comma.");
+        System.out.println("  -username,       username. Use if XAP cluster is secured.");
+        System.out.println("  -password,       password. Use if XAP cluster is secured.");
+        System.exit(0);
+    }
 
     public static void main(String[] args) {
         try {
@@ -193,31 +227,7 @@ public class MultithreadedFeeder {
             int index = args.length;
 
             if (args[0].equalsIgnoreCase("-help")) {
-                System.out.println("This program is a multi-threaded feeder.");
-                System.out.println("Available arguments are:");
-                System.out.println("  -spaceName,      Space name.");
-                System.out.println("       Default: " + DEFAULT_SPACE_NAME);
-                System.out.println("  -numThreads,     Number of threads.");
-                System.out.println("       Default: " + DEFAULT_NUM_THREADS + ", Max: " + MAX_NUM_THREADS);
-                System.out.println("  -writeChunkSize, Number of objects written per interval.");
-                System.out.println("       Default: " + DEFAULT_WRITE_CHUNK_SIZE + ", Max: " + MAX_WRITE_CHUNK_SIZE);
-                System.out.println("  -sleepInterval,  Sleep interval after writing a chunk (in seconds).");
-                System.out.println("       Default: " + DEFAULT_SLEEP_INTERVAL + ", Max: " + MAX_SLEEP_INTERVAL);
-                System.out.println("  -startId,       The id to begin writing to the space. This is useful when resuming the feeder."); 
-                System.out.println("       Default: " + DEFAULT_START_ID + ", Max: " + MAX_NUM_OBJECTS);
-                System.out.println("  -maxObjects,     Maximum number of objects in space.");
-                System.out.println("       Default: " + DEFAULT_NUM_OBJECTS + ", Max: " + MAX_NUM_OBJECTS);
-                System.out.println("  -payloadSize,    Payload size (in bytes).");
-                System.out.println("       Default: " + DEFAULT_PAYLOAD_SIZE + ", Max: " + MAX_PAYLOAD_SIZE);
-                System.out.println("  -leaseTimeout: Lease timeout (in milliseconds)");
-                System.out.println("       Default: No lease timeout used.");
-                System.out.println("  -timeout,        Timeout (in seconds) for the ExecutorService.");
-                System.out.println("       Default: " + DEFAULT_TIMEOUT);
-                System.out.println("  -numberOfPartitions,  Number of partitions.");
-                System.out.println("  -partitionIds,    The partitionIds, used with -numberOfPartitions to route values to multiple partitions.");
-                System.out.println("       For example, if numberOfPartitions is 3, partitionIds can be: 1, 2 or 3, separated with a comma.");
-                System.out.println("  -username,       username. Use if XAP cluster is secured.");
-                System.out.println("  -password,       password. Use if XAP cluster is secured.");
+                printUsage();
                 System.exit(0);
             }
 
@@ -233,7 +243,7 @@ public class MultithreadedFeeder {
                     } else if (property.equalsIgnoreCase("-writeChunkSize")) {
                         writeChunkSize = checkRange(value, 1, MAX_WRITE_CHUNK_SIZE, DEFAULT_WRITE_CHUNK_SIZE);
                     } else if (property.equalsIgnoreCase("-sleepInterval")) {
-                        sleepInterval = checkRange(value, 1, MAX_SLEEP_INTERVAL, DEFAULT_SLEEP_INTERVAL);
+                        sleepInterval = checkRange(value, 0, MAX_SLEEP_INTERVAL, DEFAULT_SLEEP_INTERVAL);
                     } else if (property.equalsIgnoreCase("-startId")) {
                         startId = checkRange(value, 0, MAX_NUM_OBJECTS, DEFAULT_START_ID);
                     } else if (property.equalsIgnoreCase("-maxObjects")) {
@@ -247,12 +257,18 @@ public class MultithreadedFeeder {
                     } else if (property.equalsIgnoreCase("-numberOfPartitions")) {
                         numberOfPartitions = checkRange(value, 1, MAX_NUMBER_OF_PARTITIONS, 1);
                     } else if (property.equalsIgnoreCase("-partitionIds")) {
-                        partitionIds = parsePartitionId(value, 1, MAX_NUMBER_OF_PARTITIONS, 1);
+                        partitionIdsValue = value;
                     } else if (property.equalsIgnoreCase("-username")) {
                         username = value;
                     } else if (property.equalsIgnoreCase("-password")) {
                         password = value;
                     }
+                    else {
+                        System.out.println("Incorrect argument provided.");
+                        printUsage();
+                        System.exit(-1);
+                    }
+
                     index -= 2;
                 }
             }
@@ -273,19 +289,19 @@ public class MultithreadedFeeder {
             // check again in case numberOfPartitions was parsed after partitionIds
             // partitionIds = parsePartitionId(new Integer(partitionId).toString(), 1, numberOfPartitions, 1);
 
-            if (numberOfPartitions != 0 && partitionIds != null && partitionIds.length > 0) {
-                log.info("Number of partitions: " + numberOfPartitions);
-                log.info("Partition(s): " + partitionIds);
+            if( partitionIdsValue != null ) {
+                partitionIds = parsePartitionId(partitionIdsValue, numberOfPartitions);
             }
             else {
-                 numberOfPartitions = 1;
-                 partitionIds = DEFAULT_PARTITION_IDS;
+                partitionIds = DEFAULT_PARTITION_IDS;
             }
+            log.info("Number of partitions: " + numberOfPartitions);
+            log.info("Partition(s): " + Arrays.toString(partitionIds));
 
             totalNumberOfThreads = threadCount * numberOfPartitions;
 
             ExecutorService executorService =
-                    Executors.newFixedThreadPool(threadCount);
+                    Executors.newFixedThreadPool(totalNumberOfThreads);
 
             for( int i=0; i < threadCount; i++) {
                 for (int j=0; j< partitionIds.length; j++) {
@@ -317,5 +333,3 @@ public class MultithreadedFeeder {
     }
 
 }
-
-

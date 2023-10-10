@@ -51,6 +51,12 @@ public class CustomSpaceConfig extends EmbeddedSpaceBeansConfig {
     private int fetchSize;
     @Value("${space.mirror.redoLogCapacity:1_000_000}")
     private int mirrorRedoLogCapacity;
+    @Value("${space.mirror.bulk-size:500}")
+    private int mirrorBulkSize;
+    @Value("${space.mirror.interval-millis:3000}")
+    private long mirrorIntervalMillis;
+    @Value("${space.mirror.interval-opers:500}")
+    private long mirrorIntervalOpers;
 
     @Override
     protected void configure(EmbeddedSpaceFactoryBean factoryBean) {
@@ -77,6 +83,9 @@ public class CustomSpaceConfig extends EmbeddedSpaceBeansConfig {
         properties.setProperty("space-config.engine.memory_usage.low_watermark_percentage",    "95");
         properties.setProperty("space-config.engine.memory_usage.gc-before-shortage", "false");
         properties.setProperty("cluster-config.mirror-service.redo-log-capacity", String.valueOf(mirrorRedoLogCapacity)); 
+        properties.setProperty("cluster-config.mirror-service.bulk-size", String.valueOf(mirrorBulkSize)); 
+        properties.setProperty("cluster-config.mirror-service.interval-millis", String.valueOf(mirrorIntervalMillis)); 
+        properties.setProperty("cluster-config.mirror-service.interval-opers", String.valueOf(mirrorIntervalOpers)); 
         factoryBean.setProperties(properties);
     }
 

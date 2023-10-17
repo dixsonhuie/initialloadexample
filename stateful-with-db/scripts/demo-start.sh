@@ -47,7 +47,7 @@ else
   nohup $GS_HOME/bin/gs.sh host run-agent           --gsc=$NUM_SPACE_GSC_PER_SERVER > /tmp/grid-console.log 2>&1 &
 fi
 
-if [ "$COMMAND_HOST" == "$HOSTNAME" ]; then
+if [[ "$COMMAND_HOST" == "$HOSTNAME" && "true" == "$MIRRORED" ]]; then
   # start gsc for mirror
   export GS_GSC_OPTIONS="$BASE_GS_GSC_OPTIONS $MIRROR_GS_GSC_OPTIONS"
   nohup $GS_HOME/bin/gs.sh host run-agent           --gsc=1 > /tmp/mirror-console.log 2>&1 &
@@ -60,7 +60,7 @@ if [ "$COMMAND_HOST" == "$HOSTNAME" ]; then
   echo "Deploying services (processing units)..."
   ./deploy.sh
 else
-  echo "Running on the second or third node. Skipping deployment.";
+  echo "Running on a node that's not $COMMAND_HOST. Skipping deployment.";
 fi
 
 

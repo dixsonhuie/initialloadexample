@@ -18,14 +18,63 @@
         <property name="ignoreResourceNotFound" value="true" />
         <property name="properties">
             <props>
-                <prop key="sourceSpaceName">demo</prop>
+                <prop key="sourceSpaceName">space</prop>
+                <prop key="db.url">jdbc:postgresql://localhost/mydb</prop>
+                <prop key="db.username">scott</prop>
+                <prop key="db.password">tiger</prop>
+                <prop key="hbm2ddl.auto">update</prop>
+                <prop key="hibernateDebug">false</prop>
             </props>
         </property>
     </bean>
 
     <context:component-scan base-package="com.mycompany.app" />
 
+    <!-- Enables to configure Spring beans through annotations   -->
+    <context:annotation-config />
 
+    <!-- Enable @PostPrimary and others annotation support. -->
+    <os-core:annotation-support />
+
+    <!-- Enables using @Polling and @Notify annotations to creating polling and notify containers  -->
+    <os-events:annotation-support />
+
+    <!-- Enables using @RemotingService and other remoting related annotations   -->
+    <os-remoting:annotation-support />
+
+    <!-- initial load -->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="url" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+    </bean>
+
+    <!--
+        Hibernate SessionFactory bean. Uses the pooled data source to connect to the database.
+    -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="com.mycompany.app.model"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2012Dialect</prop>
+                <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.show_sql">${hibernateDebug}</prop>
+                <prop key="hibernate.format_sql">${hibernateDebug}</prop>
+                <prop key="hibernate.use_sql_comments">${hibernateDebug}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hbm2ddl.auto}</prop>
+                <prop key="hibernate.jdbc.use_scrollable_resultset">false</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="hibernateSpaceDataSource" class="org.openspaces.persistency.hibernate.DefaultHibernateSpaceDataSourceFactoryBean">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- end initial load -->
     <blob-store:rocksdb-blob-store id="rocksDbBlobstore" persistent="true"/>
 
     <!--
@@ -33,8 +82,9 @@
         that we do not specify here the cluster topology of the Space. It is
         declared by the os-sla:sla element of this pu.xml file.
     -->
-    <os-core:embedded-space id="space" space-name="${sourceSpaceName}" mirrored="true">
-        <os-core:blob-store-data-policy blob-store-handler="rocksDbBlobstore" avg-object-size-KB="1200" cache-entries-percentage="100" />
+    <os-core:embedded-space id="space" space-name="${sourceSpaceName}" space-data-source="hibernateSpaceDataSource" mirrored="false">
+        <os-core:blob-store-data-policy blob-store-handler="rocksDbBlobstore"
+                    avg-object-size-KB="1200" cache-entries-percentage="100" />
         <os-core:properties>
             <props>
                 <!-- ALL IN CACHE -->
@@ -56,3 +106,4 @@
     <os-core:giga-space id="gigaSpace" space="space" tx-manager="transactionManager"/>
 
 </beans>
+

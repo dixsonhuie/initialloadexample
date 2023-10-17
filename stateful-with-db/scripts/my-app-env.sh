@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
 
 # sla
-export SPACE_PARTITIONS="4"
+export SPACE_PARTITIONS="1"
 
 export SPACE_HA="true"
 
-export MAX_INSTANCES_PER_MACHINE="1"
+#export MAX_INSTANCES_PER_MACHINE="4"
+
+export MIRRORED="false"
+
+export COMMAND_HOST="ip-172-31-0-44"
 
 # service grid
-export MANAGER_HA="true"
+export MANAGER_HA="false"
 if [ "$MANAGER_HA" == "true" ]; then
   export GS_MANAGER_SERVERS="ip-172-31-0-44,ip-172-31-1-56,ip-172-31-13-91"
 else
-  export GS_MANAGER_SERVERS="localhost";
+  export GS_MANAGER_SERVERS="$COMMAND_HOST";
 fi
 
-export NUM_SPACE_GSC_PER_SERVER="4"
+export NUM_SPACE_GSC_PER_SERVER="2"
 
-export COMMAND_HOST="ip-172-31-0-44"
-export TIERED_STORAGE="false"
+export MEMORYXTEND="true"
 export CLEAN_WORK_DIR="true"
 
 
@@ -29,7 +32,7 @@ export GS_CLI_VERBOSE="true"
 #export GS_NIC_ADDRESS=$(hostname -i)
 
 
-export GS_OPTIONS_EXT="-Dcom.gs.work=/data/work"
+#export GS_OPTIONS_EXT="-Dcom.gs.work=/data/work"
 
 export GS_MANAGER_OPTIONS="-Xms1g -Xmx1g"
 export GS_GSA_OPTIONS="-Xms512m -Xmx512m"
@@ -50,7 +53,7 @@ function display_env_vars() {
   echo "GS_MANAGER_SERVERS is $GS_MANAGER_SERVERS"
   echo "COMMAND_HOST is $COMMAND_HOST"
   #echo "GS_NIC_ADDRESS is $GS_NIC_ADDRESS"
-  echo "TIERED_STORAGE is $TIERED_STORAGE"
+  echo "MEMORYXTEND is $MEMORYXTEND"
   echo "CLEAN_WORK_DIR is $CLEAN_WORK_DIR"
   echo "GS_HOME is $GS_HOME"
   echo "GS_CLI_VERBOSE is $GS_CLI_VERBOSE"

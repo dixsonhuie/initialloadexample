@@ -11,12 +11,12 @@ echo "current working directory is: `(pwd)`";
 
 if [ -e target ]; then
     echo "Purging existing files from target..."
-    rm -r target
+    rm -r target/
 fi
 mvn clean package
 mkdir target
-if [ "$TIERED_STORAGE" == "true" ]; then
-  mv space-tiered-storage/target/space-tiered-storage-0.1.jar target/space-0.1.jar
+if [ "$MEMORYXTEND" == "true" ]; then
+  mv space-tiered-storage/target/space-tiered-storage-0.1.jar target/
 else
   mv space/target/space-0.1.jar target/
 fi

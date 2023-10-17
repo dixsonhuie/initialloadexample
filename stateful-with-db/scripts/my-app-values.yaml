@@ -1,11 +1,26 @@
 space:
+  name: demo
+  # initial load configurations
+  dataSource:
+    fetchSize: 100
+  # mirror redolog configurations
   mirror:
-    redoLogCapacity: 12000000
+    redoLogCapacity: 6000000
     bulk-size: 20000 
     interval-millis: 10000
     interval-opers: 100000
+  # defined for mirror pu
+  partitions: 1
+  ha: true
+# below used for initialload and mirror
 hibernate:
+  dialect: org.hibernate.dialect.SQLServer2012Dialect
   connection:
     pool_size: 200
     initial_pool_size: 200
     pool_validation_interval: 120
+db:
+  driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  url: jdbc:sqlserver://172.31.4.60:1433;databaseName=piperdb;encrypt=false
+  user: piper
+  password: Piper123*

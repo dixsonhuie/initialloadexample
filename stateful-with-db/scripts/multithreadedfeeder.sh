@@ -19,9 +19,9 @@ nohup java -Xms1g -Xmx1g -jar $PROJ_DIR/feeder/target/feeder-0.1-jar-with-depend
   -numThreads 3 \
   -sleepInterval 0 \
   -writeChunkSize 10000 \
-  -maxObjects 48000000 \
-  -numberOfPartitions 4 \
-  -partitionIds 1,2,3,4 \
+  -maxObjects 96000000 \
+  -numberOfPartitions 16 \
+  -partitionIds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
 >/tmp/feeder.log 2>&1 &
 
 

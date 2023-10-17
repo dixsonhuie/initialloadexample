@@ -28,7 +28,7 @@ public class MultithreadedFeeder {
 
     private static final int MAX_LEASE_TIMEOUT = 12 * 3600 * 1000;
     private static final int MAX_TIMEOUT = 12 * 3600;
-    private static final int MAX_NUMBER_OF_PARTITIONS = 8;
+    private static final int MAX_NUMBER_OF_PARTITIONS = 16;
 
     private static Logger log = Logger.getLogger(MultithreadedFeeder.class.getName());
     private GigaSpace gigaSpace;

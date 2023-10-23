@@ -49,7 +49,7 @@ public class CustomSpaceConfig extends EmbeddedSpaceBeansConfig {
     private int limitResults;
     @Value("${space.dataSource.fetchSize:100}")
     private int fetchSize;
-    @Value("${space.mirror.redoLogCapacity:1_000_000}")
+    @Value("${space.mirror.redoLogCapacity:1000000}")
     private int mirrorRedoLogCapacity;
     @Value("${space.mirror.bulk-size:500}")
     private int mirrorBulkSize;

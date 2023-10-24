@@ -4,13 +4,13 @@ set -x
 
 . ./my-app-env.sh
 
-if [ "$MEMORYXTEND" == "true" ]; then
-  JAR_FILENAME="../target/space-tiered-storage-0.1.jar"
-  PROP_FILENAME="pu.properties"
-else
+#if [ "$MEMORYXTEND" == "true" ]; then
+#  JAR_FILENAME="../target/space-tiered-storage-0.1.jar"
+#  PROP_FILENAME="pu.properties"
+#else
   JAR_FILENAME="../target/space-0.1.jar"
   PROP_FILENAME="my-app-values.yaml"
-fi
+#fi
 
 if [ "true" == "$SPACE_HA" ]; then
   echo "Deploying space with ha..."

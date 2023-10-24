@@ -7,7 +7,8 @@ export SPACE_HA="true"
 
 #export MAX_INSTANCES_PER_MACHINE="4"
 
-export MIRRORED="false"
+# this value should be consistent with value in my-app-values.yaml file
+export MIRRORED="true"
 
 export COMMAND_HOST="ip-172-31-0-44"
 
@@ -21,7 +22,7 @@ fi
 
 export NUM_SPACE_GSC_PER_SERVER="2"
 
-export MEMORYXTEND="true"
+#export MEMORYXTEND="true"
 export CLEAN_WORK_DIR="true"
 
 
@@ -53,7 +54,7 @@ function display_env_vars() {
   echo "GS_MANAGER_SERVERS is $GS_MANAGER_SERVERS"
   echo "COMMAND_HOST is $COMMAND_HOST"
   #echo "GS_NIC_ADDRESS is $GS_NIC_ADDRESS"
-  echo "MEMORYXTEND is $MEMORYXTEND"
+  #echo "MEMORYXTEND is $MEMORYXTEND"
   echo "CLEAN_WORK_DIR is $CLEAN_WORK_DIR"
   echo "GS_HOME is $GS_HOME"
   echo "GS_CLI_VERBOSE is $GS_CLI_VERBOSE"

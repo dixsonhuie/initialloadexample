@@ -2,14 +2,21 @@ space:
   name: demo
   # initial load configurations
   dataSource:
+    enabled: true
     fetchSize: 100
   # mirror redolog configurations
   mirror:
+    enabled: true
     redoLogCapacity: 6000000
     bulk-size: 20000 
     interval-millis: 10000
     interval-opers: 100000
-  # defined for mirror pu
+  memoryxtend:
+    enabled: true
+    avgObjectSizeKB: 1200
+    cacheEntriesPercentage: 100
+    main-path: /home/ubuntu/gigaspaces-xap-enterprise-16.2.1/work/memoryxtend/rocksdb
+  # defined for mirror pu, this should match the space deployment sla
   partitions: 1
   ha: true
 # below used for initialload and mirror

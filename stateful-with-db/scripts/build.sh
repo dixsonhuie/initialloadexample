@@ -15,11 +15,11 @@ if [ -e target ]; then
 fi
 mvn clean package
 mkdir target
-if [ "$MEMORYXTEND" == "true" ]; then
-  mv space-tiered-storage/target/space-tiered-storage-0.1.jar target/
-else
+#if [ "$MEMORYXTEND" == "true" ]; then
+#  mv space-tiered-storage/target/space-tiered-storage-0.1.jar target/
+#else
   mv space/target/space-0.1.jar target/
-fi
+#fi
 mv mirror/target/mirror-0.1.jar target/
 
 cd "$CWD"

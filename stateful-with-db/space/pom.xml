@@ -18,6 +18,18 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.gigaspaces</groupId>
+            <artifactId>xap-mx-rocksdb</artifactId>
+            <version>${gigaspaces.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.gigaspaces</groupId>
+                <artifactId>xap-premium-common</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>

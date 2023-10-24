@@ -16,11 +16,15 @@
 package com.mycompany.app;
 
 import java.util.Properties;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
+import com.gigaspaces.blobstore.rocksdb.config.RocksDBBlobStoreConfigurer;
+import com.gigaspaces.server.blobstore.BlobStoreStorageHandler;
 import org.hibernate.SessionFactory;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoContext;
+import org.openspaces.core.config.BlobStoreDataPolicyFactoryBean;
 import org.openspaces.core.config.annotation.EmbeddedSpaceBeansConfig;
 import org.openspaces.core.space.EmbeddedSpaceFactoryBean;
 import org.openspaces.persistency.hibernate.DefaultHibernateSpaceDataSourceConfigurer;
@@ -29,6 +33,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBuilder;
 
 public class CustomSpaceConfig extends EmbeddedSpaceBeansConfig {
+
+    private static final Logger log = Logger.getLogger(CustomSpaceConfig.class.getName());
 
     @ClusterInfoContext
     private ClusterInfo clusterInfo;
@@ -45,10 +51,14 @@ public class CustomSpaceConfig extends EmbeddedSpaceBeansConfig {
     private String dbPassword;
     @Value("${hibernate.dialect}")
     private String hibernateDialect;
+    @Value("${space.dataSource.enabled:false}")
+    private boolean dataSourceEnabled;
     @Value("${space.dataSource.limitResults:-1}")
     private int limitResults;
     @Value("${space.dataSource.fetchSize:100}")
     private int fetchSize;
+    @Value("${space.mirror.enabled:false}")
+    private boolean mirrored;
     @Value("${space.mirror.redoLogCapacity:1000000}")
     private int mirrorRedoLogCapacity;
     @Value("${space.mirror.bulk-size:500}")
@@ -57,46 +67,76 @@ public class CustomSpaceConfig extends EmbeddedSpaceBeansConfig {
     private long mirrorIntervalMillis;
     @Value("${space.mirror.interval-opers:500}")
     private long mirrorIntervalOpers;
+    @Value("${space.memoryxtend.enabled:false}")
+    private boolean memoryXtendEnabled;
+    @Value("${space.memoryxtend.avgObjectSizeKB:1200}")
+    private Integer memXtendAvgObjSizeKB;
+    @Value("${space.memoryxtend.cacheEntriesPercentage:100}")
+    private Integer memXtendCacheEntriesPercent;
+    @Value("${space.memoryxtend.main-path}")
+    private String memXtendMainPath;
+
 
     @Override
     protected void configure(EmbeddedSpaceFactoryBean factoryBean) {
         super.configure(factoryBean);
 
+        if (memoryXtendEnabled) {
+            BlobStoreStorageHandler handler = new RocksDBBlobStoreConfigurer()
+                    .setPersistent(true)
+                    .setMainPath(memXtendMainPath)
+                    .create();
+
+            BlobStoreDataPolicyFactoryBean blobStoreDataPolicyFactoryBean = new BlobStoreDataPolicyFactoryBean();
+            blobStoreDataPolicyFactoryBean.setBlobStoreHandler(handler);
+            blobStoreDataPolicyFactoryBean.setAvgObjectSizeKB(memXtendAvgObjSizeKB);
+            blobStoreDataPolicyFactoryBean.setCacheEntriesPercentage(memXtendCacheEntriesPercent);
+
+            factoryBean.setBlobStoreDataPolicy(blobStoreDataPolicyFactoryBean);
+        }
+
         factoryBean.setSpaceName(spaceName);
-        factoryBean.setSchema("persistent");
-        factoryBean.setMirrored(true);
-        factoryBean.setSpaceDataSource(new DefaultHibernateSpaceDataSourceConfigurer()
-            .sessionFactory(initSessionFactory())
-            .clusterInfo(clusterInfo)
-            .fetchSize(fetchSize)
-            //.limitResults(limitResults)
-            .create());
+        //factoryBean.setSchema("persistent");
+        factoryBean.setMirrored(mirrored);
+
+        log.info("dataSourceEnabled is: " + dataSourceEnabled);
+
+        if (dataSourceEnabled) {
+            factoryBean.setSpaceDataSource(new DefaultHibernateSpaceDataSourceConfigurer()
+                    .sessionFactory(initSessionFactory())
+                    .clusterInfo(clusterInfo)
+                    .fetchSize(fetchSize)
+                    //.limitResults(limitResults)
+                    .create());
+        }
 
         Properties properties = new Properties();
         properties.setProperty("space-config.engine.cache_policy", "1"); // 1 == ALL IN CACHE
-        properties.setProperty("space-config.external-data-source.usage", "read-only");
-        properties.setProperty("cluster-config.cache-loader.external-data-source", "true");
-        properties.setProperty("cluster-config.cache-loader.central-data-source", "true");
+        //properties.setProperty("space-config.external-data-source.usage", "read-only");
+        //properties.setProperty("cluster-config.cache-loader.external-data-source", "true");
+        //properties.setProperty("cluster-config.cache-loader.central-data-source", "true");
         properties.setProperty("space-config.engine.memory_usage.high_watermark_percentage",   "98");
         properties.setProperty("space-config.engine.memory_usage.write_only_block_percentage", "97");
         properties.setProperty("space-config.engine.memory_usage.write_only_check_percentage", "96");
         properties.setProperty("space-config.engine.memory_usage.low_watermark_percentage",    "95");
         properties.setProperty("space-config.engine.memory_usage.gc-before-shortage", "false");
-        properties.setProperty("cluster-config.mirror-service.redo-log-capacity", String.valueOf(mirrorRedoLogCapacity)); 
-        properties.setProperty("cluster-config.mirror-service.bulk-size", String.valueOf(mirrorBulkSize)); 
-        properties.setProperty("cluster-config.mirror-service.interval-millis", String.valueOf(mirrorIntervalMillis)); 
-        properties.setProperty("cluster-config.mirror-service.interval-opers", String.valueOf(mirrorIntervalOpers)); 
+        if (mirrored) {
+            properties.setProperty("cluster-config.mirror-service.redo-log-capacity", String.valueOf(mirrorRedoLogCapacity));
+            properties.setProperty("cluster-config.mirror-service.bulk-size", String.valueOf(mirrorBulkSize));
+            properties.setProperty("cluster-config.mirror-service.interval-millis", String.valueOf(mirrorIntervalMillis));
+            properties.setProperty("cluster-config.mirror-service.interval-opers", String.valueOf(mirrorIntervalOpers));
+        }
         factoryBean.setProperties(properties);
     }
 
     private SessionFactory initSessionFactory() {
         return new LocalSessionFactoryBuilder(initDataSource())
-            .scanPackages("com.mycompany.app.model")
-            .setProperty("hibernate.dialect", hibernateDialect)
-            .setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider")
-            .setProperty("hibernate.jdbc.use_scrollable_resultset", "false")
-            .setProperty("hibernate.hbm2ddl.auto", "update")
-            .buildSessionFactory();
+                .scanPackages("com.mycompany.app.model")
+                .setProperty("hibernate.dialect", hibernateDialect)
+                .setProperty("hibernate.cache.provider_class", "org.hibernate.cache.NoCacheProvider")
+                .setProperty("hibernate.jdbc.use_scrollable_resultset", "false")
+                .setProperty("hibernate.hbm2ddl.auto", "update")
+                .buildSessionFactory();
     }
 
     private DataSource initDataSource() {

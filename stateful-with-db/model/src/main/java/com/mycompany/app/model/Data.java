@@ -11,19 +11,22 @@ import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Data")
+@Table(name = "t1")
 @SpaceClass
 public class Data implements java.io.Serializable {
 
     private static final long serialVersionUID = 0L;
 
     private Integer id;
+
+    @Column(name = "message", length = 255) 
     private String message;
 
-    @Column(length = 1024)
+    @Column(name = "payload", length = 1024)
     @Lob
     private byte[] payload;
 
+    @Column(name = "processed")
     private Boolean processed;
 
 

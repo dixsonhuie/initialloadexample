@@ -3,7 +3,6 @@
  */
 
 drop table t1;
-
 declare @count int;
 declare @filler nvarchar(1024);
 
@@ -16,7 +15,7 @@ begin
   set @count = @count + 1;
 end;
 
-set @filler = CAST(@filler + @filler + @filler + @filler AS NVARCHAR(926))
+set @filler = CAST(@filler + @filler + @filler + @filler AS NVARCHAR(918))
 print @filler;
 
 
@@ -30,12 +29,15 @@ WITH
   L5   AS (SELECT 1 AS c FROM L4 AS A CROSS JOIN L4 AS B),       -- 2^32
   nums AS (SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS k FROM L5)
 
-select k as id,
-  'a_' + CAST (k as varchar(255)) as a,
-  'b_' + RIGHT('00000000'+ CAST(k AS NVARCHAR(8)),8) + @filler as b,
-  CAST (1 AS BIT) as c into t1
+
+/* isnull is needed to make the column non-null, so that the pk can be applied after */
+select isnull(k,0) as id,
+  CAST (k as varchar(255)) as message,
+  RIGHT('00000000' + CAST(k AS NVARCHAR(8)),8) + CAST(@filler AS NVARCHAR(1016)) as payload,
+  CAST (1 AS BIT) as processsed into t1
   from nums
 where k <= 96000000;
 
 
-select * from t1 where id < 10;
+/* it's better to run below separately */
+ALTER TABLE t1 ADD PRIMARY KEY (id);

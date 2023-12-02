@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # sla
-export SPACE_PARTITIONS="1"
+export SPACE_PARTITIONS="16"
 
-export SPACE_HA="true"
+export SPACE_HA="false"
 
 #export MAX_INSTANCES_PER_MACHINE="4"
 
@@ -20,9 +20,9 @@ else
   export GS_MANAGER_SERVERS="$COMMAND_HOST";
 fi
 
-export NUM_SPACE_GSC_PER_SERVER="2"
+export NUM_SPACE_GSC_PER_SERVER="4"
 
-#export MEMORYXTEND="true"
+export MEMORYXTEND="true"
 export CLEAN_WORK_DIR="true"
 
 
@@ -34,6 +34,9 @@ export GS_CLI_VERBOSE="true"
 
 
 #export GS_OPTIONS_EXT="-Dcom.gs.work=/data/work"
+#if [ "true" == "$MEMORYXTEND" ]; then
+#  export GS_OPTIONS_EXT="-Dcom.gigaspaces.lib.platform.ext=$GS_HOME/lib/optional/memoryxtend/rocksdb"
+#fi
 
 export GS_MANAGER_OPTIONS="-Xms1g -Xmx1g"
 export GS_GSA_OPTIONS="-Xms512m -Xmx512m"
@@ -54,7 +57,7 @@ function display_env_vars() {
   echo "GS_MANAGER_SERVERS is $GS_MANAGER_SERVERS"
   echo "COMMAND_HOST is $COMMAND_HOST"
   #echo "GS_NIC_ADDRESS is $GS_NIC_ADDRESS"
-  #echo "MEMORYXTEND is $MEMORYXTEND"
+  echo "MEMORYXTEND is $MEMORYXTEND"
   echo "CLEAN_WORK_DIR is $CLEAN_WORK_DIR"
   echo "GS_HOME is $GS_HOME"
   echo "GS_CLI_VERBOSE is $GS_CLI_VERBOSE"
